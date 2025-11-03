@@ -747,8 +747,8 @@ class EncoderDecoder(nn.Module):
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
         self.scheduler = ReduceLROnPlateau(
-            self.optimizer, mode="max", min_lr=1e-6, patience=0, verbose=True)
-        # self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.5, verbose=True)
+            self.optimizer, mode="max", min_lr=1e-6, patience=0)
+        # self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.5)
     
         self.max_len = max_len
         self.clip = clip
@@ -769,8 +769,15 @@ class EncoderDecoder(nn.Module):
         self.optimizer.step()
 
     def scheduler_step(self, val_bleu=None):
+        """
+        Steps the scheduler and prints the current learning rate.
+        """
+        # Store the learning rate before the step, in case it changes
+        old_lr = self.optimizer.param_groups[0]['lr']
         self.scheduler.step(val_bleu)
-        # self.scheduler.step()
+        new_lr = self.optimizer.param_groups[0]['lr']
+        if old_lr != new_lr:
+            print(f"reducing learning rate of group 0 to {new_lr}")
 
     def vec2txt(self, vector):
         """Convert vector to text.

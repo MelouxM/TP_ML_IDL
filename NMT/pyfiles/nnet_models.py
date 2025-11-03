@@ -743,7 +743,7 @@ class EncoderDecoder(nn.Module):
         self.target_dict = target_dict
 
         # set up the criterion
-        self.criterion = nn.NLLLoss(reduction='sum', ignore_index=PAD_IDX)
+        self.criterion = nn.NLLLoss(reduction='mean', ignore_index=PAD_IDX)
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
         self.scheduler = ReduceLROnPlateau(
@@ -860,7 +860,7 @@ class EncoderDecoder(nn.Module):
         decoder_output = decoder_results['decoder_output']
 
         scores = decoder_output.view(-1, decoder_output.size(-1))
-        loss = self.criterion(scores, ys.view(-1)) / ys_len.sum()
+        loss = self.criterion(scores, ys.view(-1))
 
         if train:
             loss.backward()
